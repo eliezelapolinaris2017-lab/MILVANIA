@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Facturas & Cotizaciones (Vanilla)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">FQ</div>
+      <div>
+        <h1>Facturas & Cotizaciones</h1>
+        <p class="muted">Plantillas + cálculo automático + imprimir</p>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button id="btnNew" class="btn ghost" title="Nuevo">Nuevo</button>
+      <button id="btnSave" class="btn" title="Guardar">Guardar</button>
+      <button id="btnLoad" class="btn ghost" title="Cargar guardado">Cargar</button>
+      <button id="btnPrint" class="btn primary" title="Imprimir/Exportar">Imprimir</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- PANEL -->
+    <section class="panel card no-print">
+      <h2>Datos</h2>
+
+      <div class="grid">
+        <label class="field">
+          <span>Tipo</span>
+          <select id="docType">
+            <option value="FACTURA">Factura</option>
+            <option value="COTIZACION">Cotización</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Plantilla</span>
+          <select id="template">
+            <option value="classic">Clásica</option>
+            <option value="modern">Moderna</option>
+            <option value="minimal">Minimal</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Número</span>
+          <input id="docNumber" type="text" placeholder="F-0001 / Q-0001" />
+        </label>
+
+        <label class="field">
+          <span>Fecha</span>
+          <input id="docDate" type="date" />
+        </label>
+      </div>
+
+      <hr />
+
+      <h3>Emisor</h3>
+      <div class="grid">
+        <label class="field">
+          <span>Nombre / Empresa</span>
+          <input id="fromName" type="text" placeholder="Mi Empresa LLC" />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input id="fromEmail" type="email" placeholder="correo@empresa.com" />
+        </label>
+        <label class="field">
+          <span>Teléfono</span>
+          <input id="fromPhone" type="tel" placeholder="+1 (___) ___-____" />
+        </label>
+        <label class="field">
+          <span>Dirección</span>
+          <input id="fromAddress" type="text" placeholder="Calle, Ciudad, País" />
+        </label>
+      </div>
+
+      <h3>Cliente</h3>
+      <div class="grid">
+        <label class="field">
+          <span>Nombre / Empresa</span>
+          <input id="toName" type="text" placeholder="Cliente" />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input id="toEmail" type="email" placeholder="cliente@email.com" />
+        </label>
+        <label class="field">
+          <span>Teléfono</span>
+          <input id="toPhone" type="tel" placeholder="+1 (___) ___-____" />
+        </label>
+        <label class="field">
+          <span>Dirección</span>
+          <input id="toAddress" type="text" placeholder="Calle, Ciudad, País" />
+        </label>
+      </div>
+
+      <hr />
+
+      <div class="items-head">
+        <h3>Ítems</h3>
+        <button id="btnAddItem" class="btn small">+ Agregar</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="items-table" id="itemsTable">
+          <thead>
+            <tr>
+              <th>Descripción</th>
+              <th class="num">Cant.</th>
+              <th class="num">Precio</th>
+              <th class="num">Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody"></tbody>
+        </table>
+      </div>
+
+      <hr />
+
+      <div class="grid">
+        <label class="field">
+          <span>Impuesto (%)</span>
+          <input id="taxRate" type="number" min="0" step="0.01" value="0" />
+        </label>
+
+        <label class="field">
+          <span>Descuento</span>
+          <div class="row">
+            <select id="discountType" class="inline">
+              <option value="percent">%</option>
+              <option value="amount">Monto</option>
+            </select>
+            <input id="discountValue" type="number" min="0" step="0.01" value="0" />
+          </div>
+        </label>
+
+        <label class="field">
+          <span>Moneda</span>
+          <select id="currency">
+            <option value="USD">$ USD</option>
+            <option value="EUR">€ EUR</option>
+            <option value="MXN">$ MXN</option>
+            <option value="DOP">RD$ DOP</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Notas</span>
+          <input id="notes" type="text" placeholder="Gracias por su preferencia..." />
+        </label>
+      </div>
+    </section>
+
+    <!-- VISTA PREVIA -->
+    <section class="preview card" id="preview">
+      <div id="doc" class="doc template-classic">
+        <div class="doc-top">
+          <div class="doc-title">
+            <div class="badge" id="docBadge">FACTURA</div>
+            <h2 id="docTitle">Factura</h2>
+            <div class="doc-meta">
+              <div><span class="muted">Número:</span> <strong id="pNumber">—</strong></div>
+              <div><span class="muted">Fecha:</span> <strong id="pDate">—</strong></div>
+            </div>
+          </div>
+
+          <div class="doc-brand">
+            <div class="mark" id="brandMark">FQ</div>
+          </div>
+        </div>
+
+        <div class="doc-parties">
+          <div class="party">
+            <div class="label">Emisor</div>
+            <div class="name" id="pFromName">—</div>
+            <div class="muted" id="pFromDetails">—</div>
+          </div>
+          <div class="party">
+            <div class="label">Cliente</div>
+            <div class="name" id="pToName">—</div>
+            <div class="muted" id="pToDetails">—</div>
+          </div>
+        </div>
+
+        <div class="doc-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Descripción</th>
+                <th class="num">Cant.</th>
+                <th class="num">Precio</th>
+                <th class="num">Total</th>
+              </tr>
+            </thead>
+            <tbody id="pItems"></tbody>
+          </table>
+        </div>
+
+        <div class="doc-totals">
+          <div class="totals-box">
+            <div class="line"><span class="muted">Subtotal</span><strong id="pSubtotal">—</strong></div>
+            <div class="line"><span class="muted">Descuento</span><strong id="pDiscount">—</strong></div>
+            <div class="line"><span class="muted">Impuesto</span><strong id="pTax">—</strong></div>
+            <div class="line total"><span>Total</span><strong id="pTotal">—</strong></div>
+          </div>
+
+          <div class="notes">
+            <div class="label">Notas</div>
+            <div id="pNotes" class="muted">—</div>
+          </div>
+        </div>
+
+        <footer class="doc-footer">
+          <span class="muted">Generado con la app (vanilla) • Imprimir para PDF</span>
+        </footer>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="loadDialog">
+    <form method="dialog" class="dialog card">
+      <h3>Cargar documento guardado</h3>
+      <p class="muted">Se cargará el último guardado en este navegador.</p>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="cancel">Cancelar</button>
+        <button class="btn primary" id="confirmLoad" value="ok">Cargar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
